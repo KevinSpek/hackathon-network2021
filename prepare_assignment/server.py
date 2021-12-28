@@ -6,9 +6,9 @@ import struct
 import random
 from threading import Thread
 
-GAME_PORT = 65432 # THE IP WHERE THE GAME WILL TAKE PLACE
-BROADCASE_PORT = 65431 # THE IP WHERE BROADCASE IS HAPPENING
-UDP_PORT = 65400
+GAME_PORT = 2093 # THE IP WHERE THE GAME WILL TAKE PLACE
+BROADCASE_PORT = 13117 # THE IP WHERE BROADCASE IS HAPPENING
+# UDP_PORT = 13117
 # HOST = '10.100.102.12' # THE IP OF THE SERVER MACHINE
 HOST = '93.173.11.212'
 
@@ -16,12 +16,12 @@ HOST = '93.173.11.212'
 class Server:
     def __init__(self):
         self.udp = socket(AF_INET, SOCK_DGRAM)
-        self.udp.bind(('', UDP_PORT))
+        self.udp.bind(('', BROADCASE_PORT)) # define port
         self.udp.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         
         
         self.tcp = socket(AF_INET, SOCK_STREAM)
-        self.tcp.bind(('', GAME_PORT))
+        self.tcp.bind(('', GAME_PORT)) # define port
         self.tcp.listen(10)
 
         
@@ -63,8 +63,9 @@ class Server:
             try:
                 socket, address = self.tcp.accept()
                 if not self.__full():
-                    team_name = socket.recv(2048).decode()
                     socket.setblocking(0)
+                    team_name = socket.recv(2048).decode()
+                    
                     print(f"Team {team_name} Connected!")
                     self.teams.append((socket, address, team_name))
             except:
@@ -82,7 +83,7 @@ class Server:
         broadcast_thread.join()
         receive_thread.join()
         time.sleep(2)
-        if self.__full():
+        if not self.__full():
             print("Not enough players... waiting for new players")
             self.init_game()
         else:
@@ -113,12 +114,7 @@ class Server:
                 
             
         
-        
             
-            
-            
-            
-    
 
 server = Server()
 server.init_game()

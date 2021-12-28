@@ -4,18 +4,20 @@ import struct
 import keyboard
 # CLIENT = gethostbyname(gethostname())
 CLIENT = '10.100.102.12'
-BROADCAST_PORT = 65431
+BROADCAST_PORT = 13117
 
 size = 1024
 
 class Client:
     def __init__(self, team_name):
         self.udp = socket(AF_INET, SOCK_DGRAM)
+        self.udp.bind(('', BROADCAST_PORT))
+        
         self.tcp = socket(AF_INET, SOCK_STREAM)
         self.team_name = team_name
     
     def search_host(self):
-        self.udp.bind(('', BROADCAST_PORT))
+        
         print('Client started, listening for offer requests...')
         while True:
             message ,address = self.udp.recvfrom(size)
@@ -32,8 +34,9 @@ class Client:
                 self.tcp.connect((address[0], port))
                 self.tcp.send(f'{self.team_name}\n'.encode())
                 self.play()
+                break
            
-            time.sleep(1)
+            # time.sleep(1)
     def play(self):
         welcome_message = self.tcp.recv(size)
         print(welcome_message.decode())
