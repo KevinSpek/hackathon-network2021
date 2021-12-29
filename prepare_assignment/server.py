@@ -29,7 +29,7 @@ class Server:
 
 
         
-        self.MAX_CONNECTIONS = 2 # 2 maximum players
+        self.MAX_CONNECTIONS = 1 # 2 maximum players
         self.__reset_game()
 
     def __broadcast(self):
@@ -117,26 +117,33 @@ class Server:
         print()
         print()
         print(welcome_message)
-        for socket in self.team_sockets:
-            socket.sendall(welcome_message.encode())
         flag = True 
-        
-        read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 10)
-        for socket in read_sockets:
-            answer = socket.recv(1024).decode()
+        error = False
+        for socket in self.team_sockets:
             try:
-                if int(answer) == num1 + num2:
-                    winner = self.get_team_name(socket)
-                else:
-                    winner = self.get_team_name([sock for sock in self.team_sockets if sock != socket][0])  
-                flag = False
-                break     
+                socket.sendall(welcome_message.encode())
             except:
-                pass
+                error = True
+        
+        if not error:
+            read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 10)
+            for socket in read_sockets:
+                answer = socket.recv(1024).decode()
+                try:
+                    if int(answer) == num1 + num2:
+                        winner = self.get_team_name(socket)
+                    else:
+                        winner = self.get_team_name([sock for sock in self.team_sockets if sock != socket][0])  
+                    flag = False
+                    break     
+                except:
+                    pass
         
             
         msg = "Game over.\n\n"
-        if flag:
+        if error:
+            msg += "A team has disconnected."
+        elif flag:
             msg += "No winners. Draw"
         else:
             msg += f"The winner is: {winner}"
@@ -144,7 +151,10 @@ class Server:
         
         print(msg)
         for socket in self.team_sockets:
-            socket.send(msg.encode())
+            try:
+                socket.send(msg.encode())
+            except:
+                pass
         print()
         print("=================================")
         print('Restarting')

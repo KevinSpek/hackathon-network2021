@@ -66,10 +66,13 @@ class Client:
             except: pass
         
     def __listen_gameover(self, gameover):
-        winner_message = self.tcp.recv(size)
-        gameover.finish()
-        print(self.__decode(winner_message))
-    
+        try:
+            winner_message = self.tcp.recv(size)
+            gameover.finish()
+            print(self.__decode(winner_message))
+        except:
+            print("Issue receiving message from server.")
+
     def __decode(self, string):
         st = string.decode().replace("  ", "").strip()
         return st
@@ -81,6 +84,14 @@ class Client:
                 welcome_message = self.tcp.recv(size)
                 #print(welcome_message.decode())
                 m = self.__decode(welcome_message).lower()
+                if m == '':
+                    # Bad server.
+                    # Searching for new one
+                    self.search_host()
+                    
+                    
+                
+                
                 if "welcome" in m or "quick" in m or "maths" in m or "math" in m:
                     break
                 print(self.__decode(welcome_message))
