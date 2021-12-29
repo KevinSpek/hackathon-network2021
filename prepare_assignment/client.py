@@ -51,12 +51,15 @@ class Client:
             if magic_cookie == 0xabcddcba and magic_type == 0x2:
                 # We are about to play! let's connect to server.
                 print(f"Received offer from {address[0]}, Attempting to connect...")
-                
-                self.tcp.connect((address[0], port))
-                self.tcp.send(f'{self.team_name}\n'.encode())
-                print("Connected")
-                self.play()
-            print("Failed to connect, listening for other offer requests...")
+                try:
+                    self.tcp.connect((address[0], port))
+                    self.tcp.send(f'{self.team_name}\n'.encode())
+                    print("Connected")
+                    self.play()
+                    break
+                except:
+                    pass
+                print("Failed to connect, listening for other offer requests...")
             time.sleep(1)
             
     def __listen_keyboard(self, gameover, socket):
