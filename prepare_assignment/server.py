@@ -29,7 +29,7 @@ class Server:
 
 
         
-        self.MAX_CONNECTIONS = 2 # 2 maximum players
+        self.MAX_CONNECTIONS = 1 # 2 maximum players
         self.__reset_game()
 
     def __broadcast(self):
@@ -123,7 +123,7 @@ class Server:
                             "Number of golder starts in the EU flag"
                     
                             ]        
-        answers = [3, 10, 11, 10, 43, 8, 404, 12]
+        answers = [3, 10, 11, 10, 43, 8, 6, 404, 12]
         fibo = [0, 1, 1, 2, 3, 5, 8]
         num1 = random.randint(3,7)
         index_question = random.randint(0,len(list_of_questions)-1)

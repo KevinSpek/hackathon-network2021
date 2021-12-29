@@ -4,6 +4,7 @@ import struct
 import getch
 from threading import Thread
 from getch import getch
+from termcolor import colored
 
 
 BROADCAST_PORT = 13117
@@ -72,6 +73,7 @@ class Client:
             print(self.__decode(winner_message))
         except:
             print("Issue receiving message from server.")
+        
 
     def __decode(self, string):
         st = string.decode().replace("  ", "").strip()
@@ -116,6 +118,6 @@ class Client:
         self.search_host()
         
         
-client = Client("Florish")
+client = Client("The BITles")
 client.search_host()
         
