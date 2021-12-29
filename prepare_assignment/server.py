@@ -8,8 +8,8 @@ from threading import Thread
 GAME_PORT = 2093 # THE IP WHERE THE GAME WILL TAKE PLACE
 BROADCASE_PORT = 13117 # THE IP WHERE BROADCASE IS HAPPENING
 UDP_PORT = 65339
-# HOST = gethostbyname(gethostname())
-HOST = '111'
+HOST = gethostbyname(gethostname())
+# HOST = '111'
 magic_cookie = 0xabcddcba
 magic_type = 0x2
 
