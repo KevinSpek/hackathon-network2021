@@ -1,5 +1,4 @@
 from socket import *
-import sys
 import time
 import struct
 import select
@@ -10,17 +9,24 @@ GAME_PORT = 2093 # THE IP WHERE THE GAME WILL TAKE PLACE
 BROADCASE_PORT = 13999 # THE IP WHERE BROADCASE IS HAPPENING
 UDP_PORT = 65339
 HOST = gethostbyname(gethostname())
+HOST = '111'
 
 class Server:
     def __init__(self):
         self.udp = socket(AF_INET, SOCK_DGRAM)
-        self.udp.bind(('', UDP_PORT))
         self.udp.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        self.udp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        self.udp.bind(('', UDP_PORT))
+
+        
         
         
         self.tcp = socket(AF_INET, SOCK_STREAM)
+        self.tcp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         self.tcp.bind(('', GAME_PORT))
         self.tcp.listen(10)
+        
+
 
         
         self.MAX_CONNECTIONS = 2 # 2 maximum players
@@ -66,7 +72,7 @@ class Server:
                 socket, address = self.tcp.accept()
                 if not self.__full():
                     socket.setblocking(0)
-                    team_name = socket.recv(2048).decode()
+                    team_name = socket.recv(2048).decode().replace("\n", "")
                     print(f"Team {team_name} Connected!")
                     self.team_names[socket.getsockname()] = team_name
                     self.team_sockets.append(socket)
@@ -101,8 +107,8 @@ class Server:
         
         welcome_message = 'Welcome to Quick Maths.\n'
         welcome_message += f'Player 1: {self.get_team_name(self.team_sockets[0])}\n'
-        # welcome_message += f'Player 2: {self.get_team_name(self.team_sockets[1])}\n'
-        welcome_message += '==\n'
+        welcome_message += f'Player 2: {self.get_team_name(self.team_sockets[1])}\n'
+        welcome_message += '=======\n'
         welcome_message += 'Please answer the following question as fast as you can:\n'
         
         num1 = random.randint(0,4)
@@ -112,28 +118,31 @@ class Server:
         for socket in self.team_sockets:
             socket.sendall(welcome_message.encode())
         flag = True 
-        while flag:
-            read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 10)
-            for socket in read_sockets:
-                answer = socket.recv(1024).decode()
-                try:
-                    if int(answer) == num1 + num2:
-                        winner = self.get_team_name(socket)
-                        flag = False
-                        break
-                except:
-                    pass
+        
+        read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 10)
+        for socket in read_sockets:
+            answer = socket.recv(1024).decode()
+            try:
+                if int(answer) == num1 + num2:
+                    winner = self.get_team_name(socket)
+                    flag = False
+                    break
+            except:
+                pass
         if flag:
-            msg = "Draw"
+            msg = "No winners. Draw"
         else:
             msg = f"The winner is: {winner}"
         
-            
-
+        print()
+        print(msg)
         for socket in self.team_sockets:
             socket.sendall(msg.encode())
-            
-        self.reset_game()
+        print()
+        print("=================================")
+        print("Game finished. Restarting") 
+        time.sleep(2)   
+        self.__reset_game()
         self.init_game()
             
             

@@ -2,10 +2,11 @@ from socket import *
 import time
 import struct
 import getch
-from threading import Thread, Lock
+from threading import Thread
+from getch import getch
 
-CLIENT = gethostbyname(gethostname())
-BROADCAST_PORT = 1399
+
+BROADCAST_PORT = 13999
 size = 1024
 
 class Client:
@@ -16,6 +17,7 @@ class Client:
     def init_game(self):
                 
         self.udp = socket(AF_INET, SOCK_DGRAM)
+        self.udp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.udp.bind(('', BROADCAST_PORT))
         self.tcp = socket(AF_INET, SOCK_STREAM)
         self.gameover = False
