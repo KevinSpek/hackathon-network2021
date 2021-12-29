@@ -106,8 +106,10 @@ class Server:
     def __play(self):
         
         welcome_message = 'Welcome to Quick Maths.\n'
-        welcome_message += f'Player 1: {self.get_team_name(self.team_sockets[0])}\n'
-        welcome_message += f'Player 2: {self.get_team_name(self.team_sockets[1])}\n'
+        i = 1
+        for team_socket in self.team_sockets:
+            welcome_message += f'Player {i}: {self.get_team_name(team_socket)}\n'
+            i += 1
         welcome_message += '=======\n'
         welcome_message += 'Please answer the following question as fast as you can:\n'
         list_of_questions = ["Number of kilometers in 1.864 miles (Rounded up)",
