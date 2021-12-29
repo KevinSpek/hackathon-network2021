@@ -5,7 +5,7 @@ import getch
 from threading import Thread, Lock
 
 CLIENT = gethostbyname(gethostname())
-BROADCAST_PORT = 13117
+BROADCAST_PORT = 1399
 size = 1024
 
 class Client:
@@ -74,7 +74,10 @@ class Client:
     
         key_listen._Thread_stop()
         
+        print("Game finished.")
+        self.search_host()
         
-client = Client("!")
+        
+client = Client("Team Fernich")
 client.search_host()
         
