@@ -29,7 +29,7 @@ class Server:
 
 
         
-        self.MAX_CONNECTIONS = 1 # 2 maximum players
+        self.MAX_CONNECTIONS = 2 # 2 maximum players
         self.__reset_game()
 
     def __broadcast(self):
