@@ -6,10 +6,12 @@ import random
 from threading import Thread
 
 GAME_PORT = 2093 # THE IP WHERE THE GAME WILL TAKE PLACE
-BROADCASE_PORT = 13999 # THE IP WHERE BROADCASE IS HAPPENING
+BROADCASE_PORT = 13117 # THE IP WHERE BROADCASE IS HAPPENING
 UDP_PORT = 65339
-HOST = gethostbyname(gethostname())
+# HOST = gethostbyname(gethostname())
 HOST = '111'
+magic_cookie = 0xabcddcba
+magic_type = 0x2
 
 class Server:
     def __init__(self):
@@ -17,8 +19,6 @@ class Server:
         self.udp.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self.udp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         self.udp.bind(('', UDP_PORT))
-
-        
         
         
         self.tcp = socket(AF_INET, SOCK_STREAM)
@@ -36,7 +36,7 @@ class Server:
 
         
         print(f"Server started, listening on IP address {HOST}")
-        password = struct.pack('ii', 95768, GAME_PORT) # this is the password the verify it came from the right server
+        password = struct.pack('Ibh', magic_cookie, magic_type, GAME_PORT) # this is the password the verify it came from the right server
         
         while not self.__full(): # wait for MAX_CONNECTIONS to be filled 
             
@@ -53,7 +53,7 @@ class Server:
         to_remove = []
         for socket in self.team_sockets:
             try:
-                socket.send("check".encode())
+                socket.send("check if live".encode())
             except:
                 to_remove.append(socket)
                 
@@ -65,7 +65,7 @@ class Server:
     def get_team_name(self, socket):
         return self.team_names[socket.getsockname()]
          
-        
+    
     def __receive_teams(self):
         while not self.__full():
             try:
@@ -114,6 +114,8 @@ class Server:
         num1 = random.randint(0,4)
         num2 = random.randint(0,4)
         welcome_message += f'How much is {num1}+{num2}?'
+        print()
+        print()
         print(welcome_message)
         for socket in self.team_sockets:
             socket.sendall(welcome_message.encode())
@@ -125,22 +127,27 @@ class Server:
             try:
                 if int(answer) == num1 + num2:
                     winner = self.get_team_name(socket)
-                    flag = False
-                    break
+                else:
+                    winner = self.get_team_name([sock for sock in self.team_sockets if sock != socket][0])  
+                flag = False
+                break     
             except:
                 pass
-        if flag:
-            msg = "No winners. Draw"
-        else:
-            msg = f"The winner is: {winner}"
         
-        print()
+            
+        msg = "Game over.\n\n"
+        if flag:
+            msg += "No winners. Draw"
+        else:
+            msg += f"The winner is: {winner}"
+        
+        
         print(msg)
         for socket in self.team_sockets:
-            socket.sendall(msg.encode())
+            socket.send(msg.encode())
         print()
         print("=================================")
-        print("Game finished. Restarting") 
+        print('Restarting')
         time.sleep(2)   
         self.__reset_game()
         self.init_game()
