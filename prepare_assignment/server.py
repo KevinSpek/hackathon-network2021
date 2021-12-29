@@ -4,11 +4,12 @@ import struct
 import select
 import random
 from threading import Thread
+import scapy.all as scapy
 
 GAME_PORT = 2093 # THE IP WHERE THE GAME WILL TAKE PLACE
 BROADCASE_PORT = 13117 # THE IP WHERE BROADCASE IS HAPPENING
-UDP_PORT = 65339
-HOST = gethostbyname(gethostname())
+TCP_PORT = 20000
+HOST = scapy.get_if_addr("eth2")
 # HOST = '111'
 magic_cookie = 0xabcddcba
 magic_type = 0x2
@@ -18,30 +19,31 @@ class Server:
         self.udp = socket(AF_INET, SOCK_DGRAM)
         self.udp.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self.udp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-        self.udp.bind(('', UDP_PORT))
+        self.udp.bind((HOST, GAME_PORT))
         
         
         self.tcp = socket(AF_INET, SOCK_STREAM)
         self.tcp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-        self.tcp.bind(('', GAME_PORT))
+        self.tcp.bind((HOST, TCP_PORT))
         self.tcp.listen(10)
         
 
 
         
-        self.MAX_CONNECTIONS = 1 # 2 maximum players
+        self.MAX_CONNECTIONS = 2 # 2 maximum players
         self.__reset_game()
 
     def __broadcast(self):
 
         
         print(f"Server started, listening on IP address {HOST}")
-        password = struct.pack('Ibh', magic_cookie, magic_type, GAME_PORT) # this is the password the verify it came from the right server
+        password = struct.pack('Ibh', magic_cookie, magic_type, TCP_PORT) # this is the password the verify it came from the right server
         
         while not self.__full(): # wait for MAX_CONNECTIONS to be filled 
             
-            try: self.udp.sendto(password, ('<broadcast>', BROADCASE_PORT))
+            try: self.udp.sendto(password, ('172.99.255.255', BROADCASE_PORT))
             except: pass
+            
             time.sleep(1)
                     
     def __full(self):
@@ -53,7 +55,8 @@ class Server:
         to_remove = []
         for socket in self.team_sockets:
             try:
-                socket.send("check if live".encode())
+                pass
+                # socket.send("check if live".encode())
             except:
                 to_remove.append(socket)
                 
