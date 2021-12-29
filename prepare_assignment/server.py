@@ -110,10 +110,23 @@ class Server:
         welcome_message += f'Player 2: {self.get_team_name(self.team_sockets[1])}\n'
         welcome_message += '=======\n'
         welcome_message += 'Please answer the following question as fast as you can:\n'
-        
-        num1 = random.randint(0,4)
-        num2 = random.randint(0,4)
-        welcome_message += f'How much is {num1}+{num2}?'
+        list_of_questions = ["Number of kilometers in 1.864 miles (Rounded up)",
+                            "Number of plagues in Egypt",
+                            "Number of apollo mission spaceflight that landed the first two men on the moon",
+                            "Number of different types of hands in Poker",
+                            "Number of presidents before Obama in the united states",
+                            "Number of legs a black widow spider has",
+                            "Number of key in old phones that featured the letters M, N and O",
+                            "Number of NOT FOUND error in the internet",
+                            "Number of golder starts in the EU flag"
+                    
+                            ]        
+        answers = [3, 10, 11, 10, 43, 8, 404, 12]
+        fibo = [0, 1, 1, 2, 3, 5, 8]
+        num1 = random.randint(3,7)
+        index_question = random.randint(0,len(list_of_questions)-1)
+        res = (fibo[num1-1]) * answers[index_question]  % 10
+        welcome_message += f'How much is Fibonacci({num1}) TIMES the {list_of_questions[index_question]} MODULU 10?'
         print()
         print()
         print(welcome_message)
@@ -126,11 +139,11 @@ class Server:
                 error = True
         
         if not error:
-            read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 10)
+            read_sockets, write_sockets, error_sockets = select.select(self.team_sockets, [], [], 15)
             for socket in read_sockets:
                 answer = socket.recv(1024).decode()
                 try:
-                    if int(answer) == num1 + num2:
+                    if int(answer) == res:
                         winner = self.get_team_name(socket)
                     else:
                         winner = self.get_team_name([sock for sock in self.team_sockets if sock != socket][0])  
@@ -139,8 +152,12 @@ class Server:
                 except:
                     pass
         
-            
+        print()
+        print()
         msg = "Game over.\n\n"
+        msg += f"The answer is {fibo[num1-1]} * {answers[index_question]} % 10 = {res} \n"
+
+        
         if error:
             msg += "A team has disconnected."
         elif flag:
