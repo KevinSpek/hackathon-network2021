@@ -4,7 +4,7 @@ import struct
 import getch
 from threading import Thread
 from getch import getch
-from termcolor import colored
+
 
 
 BROADCAST_PORT = 13117
@@ -32,7 +32,7 @@ class Client:
                 
         self.udp = socket(AF_INET, SOCK_DGRAM)
         self.udp.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-        self.udp.bind(('', BROADCAST_PORT))
+        self.udp.bind(('172.99.255.255', BROADCAST_PORT))
         self.tcp = socket(AF_INET, SOCK_STREAM)
         self.gameover = False
     

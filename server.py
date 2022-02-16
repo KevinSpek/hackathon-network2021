@@ -31,7 +31,7 @@ class Server:
 
 
         
-        self.MAX_CONNECTIONS = 1 # 2 maximum players
+        self.MAX_CONNECTIONS = 2 # 2 maximum players
         self.__reset_game()
 
     def __broadcast(self):
@@ -42,8 +42,9 @@ class Server:
         
         while not self.__full(): # wait for MAX_CONNECTIONS to be filled 
             
-            try: self.udp.sendto(password, ('<broadcast>', BROADCASE_PORT))
+            try: self.udp.sendto(password, ('172.99.255.255', BROADCASE_PORT))
             except: pass
+            
             time.sleep(1)
                     
     def __full(self):
